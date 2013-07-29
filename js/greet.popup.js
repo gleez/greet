@@ -6,8 +6,8 @@
  * @version    1.3
  * @requires   jQuery v1.9 or later
  * @author     Sandeep Sangamreddi - Gleez
- * @copyright  (c) 2011-2013 Gleez Technologies
- * @license    http://gleezcms.org/license Gleez CMS License
+ * @copyright  (c) 2005-2013 Gleez Technologies
+ * @license    The MIT License (MIT)
  *
 */
 
