@@ -80,7 +80,7 @@
 		this.$element.find('[data-dismiss="fileupload"]').on('click.greet.fileupload', $.proxy(this.clear, this))
 	}
 
-    Fileupload.prototype.accept = function(file) {
+	Fileupload.prototype.accept = function(file) {
 		//restrict number of uploaded files when queue is 0
 		if(this.options.maxfiles > 0 && this.total >= this.options.maxfiles && this.options.queuefiles === 0){
 			return false
@@ -99,7 +99,7 @@
 		}
 
 		return true
-    }
+	}
 
 	Fileupload.prototype.addFile = function(file, i) {
 		file.upload = {
@@ -107,6 +107,10 @@
 			, total     : file.size
 			, bytesSent : 0
 		}
+
+		// Set some defaults
+		file.iframe  = false
+		file.chunked = false
 
 		file.status = Fileupload.ADDED
 		this.files.push(file)
@@ -212,16 +216,12 @@
 					}
 				}
 			}
-			else {
-				// mark this file as iframe upload
-				file.iframe = true
-			}
 
 			// Add the loading spinner
 			this.loading(file)
 
 			// IE less than 10 dose not support file.size.
-			if(this.isHTML5 && this.options.chunked && file.size != undefined) {
+			if(this.isHTML5 && this.options.chunked) {
 				// Chunked upload
 				this.chunkUpload(xhr, file)
 			}
@@ -254,7 +254,7 @@
 		file.formData = formData
 
 		// Send the form data (multipart/form-data)
-		this.send(xhr, file, false)
+		this.send(xhr, file)
 	}
 
 	Fileupload.prototype.binaryStringUpload = function(xhr, file) {
@@ -292,6 +292,9 @@
 		, iframeSrc = /^https/i.test(window.location.href || '') ? 'javascript:false' : 'about:blank'
 		, fileInput = this.$input
 		, that      = this
+
+		// set this file as iframe upload
+		file.iframe = true
 
 		// add iframe atributes
 		iframe.attr('src',    iframeSrc)
@@ -368,38 +371,22 @@
 		}
 	}
 
-	Fileupload.prototype.chunkUpload = function(xhr, file) {
-		var fs    = file.size
-		,   mcs   = this.options.maxchunksize || fs
-		,   bpc   = this.options.chunksize || 1024 * 1024
-		,   start = 0
-		,   end   = bpc
-		,   index = 0
-		,   slices = Math.max(Math.ceil(fs / bpc), 1)
+	Fileupload.prototype.chunkUpload = function(xhr, file, start = 0) {
+		var bpc      = this.options.chunksize || 1024 * 1024
 
-		while(start < fs) {
-			if(end > file.size) end = file.size
+		file.chunked = true
+		file.paused  = false
+		file.index   = (start == 0) ? 0 : file.index + 1
+		file.slices  = Math.max(Math.ceil(file.size / bpc), 1)
 
-			// Android default browser in version 4.0.4 has webkitSlice instead of slice()
-			if(file.webkitSlice){
-				var chunk = file.webkitSlice(start, end)
-			}
-			else{
-				var chunk = file.slice(start, end)
-			}
+		file.start   = start
+		file.end     = Math.min(file.start+bpc, file.size)
 
-			var chunkObj = {chunk: chunk, index: index, start: start, end: end, slices: slices}
-			file.chunks.push(chunkObj)
-
-			start = end
-			end   = start + bpc
-			index++
-		}
 		// @todo chunked upload
-		//this.send(xhr, file, chunked)
+		this.send(xhr, file)
 	}
 
-	Fileupload.prototype.send = function(xhr, file, chunked) {
+	Fileupload.prototype.send = function(xhr, file) {
 		// Open the AJAX call
 		xhr.open(this.options.method, this.options.remote, this.options.async)
 
@@ -413,16 +400,17 @@
 		xhr.setRequestHeader('Accept', 'application/json')
 
 		// Chunked upload and optional headers
-		if(chunked){
+		if(file.chunked){
 			xhr.overrideMimeType('application/octet-stream')
-			xhr.setRequestHeader('Content-Range', 'bytes '+chunked.start+"-"+chunked.end+"/"+chunked.size)
+			xhr.setRequestHeader('Content-Range', 'bytes '+file.start+"-"+file.end+"/"+file.size)
 			//xhr.setRequestHeader('Sender', 'XMLHttpRequest')
 
 			// custom header with filename and full size
-			xhr.setRequestHeader("X-File-Name",  file.name)
-			xhr.setRequestHeader("X-File-Size",  file.size)
-			xhr.setRequestHeader("X-File-Index", chunked.index)
-			xhr.setRequestHeader("X-File-Type",  file.type)
+			xhr.setRequestHeader("X-File-Name",   file.name)
+			xhr.setRequestHeader("X-File-Size",   file.size)
+			xhr.setRequestHeader("X-File-Index",  file.index)
+			xhr.setRequestHeader("X-File-Type",   file.type)
+			xhr.setRequestHeader("X-File-Slices", file.slices)
 
 			// add any necessary form data as X-Form headers
 			$.each(this.options.data, function(key, value) {
@@ -436,14 +424,19 @@
 		}
 
 		// Android default browser in version 4.0.4 has webkitSlice instead of slice()
-		if (chunked && file.webkitSlice) {
+		if (file.chunked && file.webkitSlice) {
+			file = file.webkitSlice(file.start, file.end)
+
 			// we cannot send a blob, because body payload will be empty thats why we send an ArrayBuffer
 			this.blobToArrayBuffer(file, function(buf) {
 				xhr.send(buf)
 			})
 		}
-		else {
+		else if (file.chunked && file.end) {
 			// but if we support slice() everything should be ok
+			xhr.send( file.slice(file.start, file.end) )
+		}
+		else {
 			// Blob or Formdata or File
 			xhr.send(file)
 		}
@@ -649,15 +642,24 @@
 
 	Fileupload.prototype.fileProgress = function(event, file, fileIndex) {
 		if (event.lengthComputable) {
-			var progress = (event.loaded / event.total) * 100
+			var total   = event.total
+			,   loaded  = event.loaded
+			,   progress
+
+			if(file.chunked){
+				loaded   = parseInt(event.loaded + file.start)
+				total    = file.size
+			}
+
+			progress = Math.ceil( (loaded / total) * 100 )
 
 			file.upload = {
 				progress  : progress,
-				total     : event.total,
-				bytesSent : event.loaded
+				total     : total,
+				bytesSent : loaded
 			}
 
-            console.log(progress + '% uploaded - ' + fileIndex)
+			console.log(progress + '% uploaded - ' + fileIndex)
 		}
 	}
 
@@ -680,12 +682,16 @@
 	Fileupload.prototype.uploadComplete = function(response, file, fileIndex) {
 		var that = this
 
+		if(file.chunked && !file.paused && typeof file.end !== "undefined" && file.end != file.size) {
+			return this.chunkUpload(file.xhr, file, file.end)
+		}
+
 		// Update processing data
 		file.status    = Fileupload.SUCCESS
 		file.upload.progress  = 100
 		file.upload.bytesSent = file.upload.total
 
-		if(typeof file.iframe !== "undefined"){
+		if(file.iframe == true){
 			this.$preview.empty()
 			$('<img />').attr('src', response.file.src).appendTo(this.$preview)
 		}
@@ -716,17 +722,18 @@
 	/**
 	* Pause the upload (works for chunked uploads only).
 	*/
-	Fileupload.prototype.pause = function(){
-		this.paused = true
+	Fileupload.prototype.pause = function(file){
+		if (file.chunked && !file.paused) {
+			file.paused = true
+		}
 	}
 
 	/**
 	* Resume the upload (works for chunked uploads only).
 	*/
-	Fileupload.prototype.resume = function(){
-		if (this.paused)
-		{
-			this.paused = false
+	Fileupload.prototype.resume = function(file){
+		if (file.chunked && file.paused) {
+			file.paused = false
 			//this.upload()
 		}
 	}
