@@ -70,6 +70,7 @@
 		}
 
 		this.listen()
+		this.$element.trigger('init.greet.fileupload', this)
 	}
 
 	Fileupload.prototype.listen = function() {
@@ -118,8 +119,10 @@
 		// Show image preview
 		this.preview(file)
 
-		if(this.accept(file)){
+		if(this.accept(file)) {
 			this.workQueue.push(i)
+
+			this.$element.trigger('add.greet.fileupload', file, i)
 		}
 	}
 
@@ -195,7 +198,9 @@
 			// Create a new AJAX request
 			var xhr  = file.xhr = new XMLHttpRequest()
 			,   that = this
-		
+
+			this.$element.trigger('upload.greet.fileupload', file, fileIndex)
+
 			if(this.isHTML5){
 				// Add event handlers
 				xhr.upload.onprogress = function(e){ that.fileProgress(e, file, fileIndex)	}
@@ -204,11 +209,12 @@
 
 				xhr.onload = function(e) {
 					if (xhr.readyState === 4 && xhr.status === 200) {
-						try{
+						try {
 							var response = xhr.responseText
-							response = $.parseJSON(response)
+							response     = $.parseJSON(response)
 							that.uploadComplete(response, file, fileIndex)
-						} catch(ev) {
+						}
+						catch(ev) {
 							that.fileError(e, file, fileIndex)
 						}
 					} else {
@@ -394,6 +400,8 @@
 		$.each(this.options.headers, function(k, v) {
 			xhr.setRequestHeader(k, v)
 		})
+
+		this.$element.trigger('send.greet.fileupload', file, xhr)
 
 		// set the XMLHttpRequest header
 		xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest")
@@ -634,10 +642,10 @@
 		}, 500)
 
 		// set default loading attributes
-		file.$loading .css('height', height)
-					  .css('width',  width)
-
+		file.$loading .css('height', height).css('width',  width)
 		this.$element.prepend(file.$loading)
+
+		this.$element.trigger('loading.greet.fileupload', file)
 	}
 
 	Fileupload.prototype.fileProgress = function(event, file, fileIndex) {
@@ -660,6 +668,7 @@
 			}
 
 			console.log(progress + '% uploaded - ' + fileIndex)
+			this.$element.trigger('progress.greet.fileupload', file, fileIndex)
 		}
 	}
 
@@ -669,6 +678,7 @@
 
 		file.$loading.remove()
 		this.$element.find('.fileupload-error').css('display', 'block')
+		this.$element.trigger('abort.greet.fileupload', file, fileIndex)
 	}
 
 	Fileupload.prototype.fileError = function(event, file, fileIndex) {
@@ -677,39 +687,43 @@
 
 		file.$loading.remove()
 		this.$element.find('.fileupload-error').css('display', 'block')
+
+		this.$element.trigger('error.greet.fileupload', file, fileIndex)
 	}
 
 	Fileupload.prototype.uploadComplete = function(response, file, fileIndex) {
 		var that = this
 
-		if(file.chunked && !file.paused && typeof file.end !== "undefined" && file.end != file.size) {
-			return this.chunkUpload(file.xhr, file, file.end)
+		if(file.chunked && typeof file.end !== "undefined" && file.end != file.size) {
+			this.chunkUpload(file.xhr, file, file.end)
 		}
+		else {
+			// Update processing data
+			file.status    = Fileupload.SUCCESS
+			file.upload.progress  = 100
+			file.upload.bytesSent = file.upload.total
 
-		// Update processing data
-		file.status    = Fileupload.SUCCESS
-		file.upload.progress  = 100
-		file.upload.bytesSent = file.upload.total
-
-		if(file.iframe == true){
-			this.$preview.empty()
-			$('<img />').attr('src', response.file.src).appendTo(this.$preview)
-		}
-
-		// Remove from processing queue
-		$.each (this.processingQueue, function (value, key) {
-			if (value === fileIndex) {
-				that.processingQueue.splice(key, 1)
+			if(file.iframe == true){
+				this.$preview.empty()
+				$('<img />').attr('src', response.file.src).appendTo(this.$preview)
 			}
-		})
 
-		// Add to donequeue
-		this.doneQueue.push(fileIndex)
-		file.$loading.remove()
+			// Remove from processing queue
+			$.each (this.processingQueue, function (value, key) {
+				if (value === fileIndex) {
+					that.processingQueue.splice(key, 1)
+				}
+			})
 
-		console.log('onload - ' + fileIndex)
+			// Add to donequeue
+			this.doneQueue.push(fileIndex)
+			file.$loading.remove()
 
-		this.$element.find('.fileupload-success').css('display', 'block')
+			console.log('onload - ' + fileIndex)
+
+			this.$element.find('.fileupload-success').css('display', 'block')
+			this.$element.trigger('uploaded.greet.fileupload', file, fileIndex)
+		}
 	}
 
 	// Helper function to enable pause of processing to wait
