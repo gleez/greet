@@ -763,7 +763,7 @@
 		size         : 0, // Max individual file size
 		filetypes    : [], // Allowed file extentions ex: 'image/png', 'image/jpeg'
 		data         : {},
-      	headers      : {},
+		headers      : {},
 		maxfiles     : 15, // Ignored if queuefiles is set > 0
 		queuefiles   : 0, // Max files before queueing (for large volume uploads)
 		queuewait    : 200, // Queue wait time if full
