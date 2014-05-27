@@ -70,15 +70,15 @@
 		}
 
 		this.listen()
-		this.$element.trigger('init.greet.fileupload', this)
+		this.$element.trigger('init.gt.fileupload', this)
 	}
 
 	Fileupload.prototype.listen = function() {
-		this.$input.on('change.greet.fileupload', $.proxy(this.change, this))
-		$(this.$input[0].form).on('reset.greet.fileupload', $.proxy(this.reset, this))
+		this.$input.on('change.gt.fileupload', $.proxy(this.change, this))
+		$(this.$input[0].form).on('reset.gt.fileupload', $.proxy(this.reset, this))
 
-		this.$element.find('[data-trigger="fileupload"]').on('click.greet.fileupload', $.proxy(this.trigger, this))
-		this.$element.find('[data-dismiss="fileupload"]').on('click.greet.fileupload', $.proxy(this.clear, this))
+		this.$element.find('[data-trigger="fileupload"]').on('click.gt.fileupload', $.proxy(this.trigger, this))
+		this.$element.find('[data-dismiss="fileupload"]').on('click.gt.fileupload', $.proxy(this.clear, this))
 	}
 
 	Fileupload.prototype.accept = function(file) {
@@ -122,7 +122,7 @@
 		if(this.accept(file)) {
 			this.workQueue.push(i)
 
-			this.$element.trigger('add.greet.fileupload', file, i)
+			this.$element.trigger('add.gt.fileupload', file, i)
 		}
 	}
 
@@ -199,7 +199,7 @@
 			var xhr  = file.xhr = new XMLHttpRequest()
 			,   that = this
 
-			this.$element.trigger('upload.greet.fileupload', file, fileIndex)
+			this.$element.trigger('upload.gt.fileupload', file, fileIndex)
 
 			if(this.isHTML5){
 				// Add event handlers
@@ -401,7 +401,7 @@
 			xhr.setRequestHeader(k, v)
 		})
 
-		this.$element.trigger('send.greet.fileupload', file, xhr)
+		this.$element.trigger('send.gt.fileupload', file, xhr)
 
 		// set the XMLHttpRequest header
 		xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest")
@@ -469,7 +469,7 @@
 				preview.html($img)
 				element.addClass('fileupload-exists').removeClass('fileupload-new')
 
-				element.trigger('change.greet.fileupload', this.files)
+				element.trigger('change.gt.fileupload', this.files)
 			}
 
 			reader.readAsDataURL(file)
@@ -479,7 +479,7 @@
 
 			this.$element.addClass('fileupload-exists').removeClass('fileupload-new')
 
-			this.$element.trigger('change.greet.fileupload')
+			this.$element.trigger('change.gt.fileupload')
 		}
 	}
 
@@ -513,7 +513,7 @@
 
 		if (e !== false) {
 			this.$input.trigger('change')
-			this.$element.trigger('clear.greet.fileupload')
+			this.$element.trigger('clear.gt.fileupload')
 		}
 	}
 
@@ -529,7 +529,7 @@
 		if (this.original.exists) this.$element.addClass('fileupload-exists').removeClass('fileupload-new')
 		 else this.$element.addClass('fileupload-new').removeClass('fileupload-exists')
 
-		this.$element.trigger('reset.greet.fileupload')
+		this.$element.trigger('reset.gt.fileupload')
 	}
 
 	Fileupload.prototype.trigger = function(e) {
@@ -645,7 +645,7 @@
 		file.$loading .css('height', height).css('width',  width)
 		this.$element.prepend(file.$loading)
 
-		this.$element.trigger('loading.greet.fileupload', file)
+		this.$element.trigger('loading.gt.fileupload', file)
 	}
 
 	Fileupload.prototype.fileProgress = function(event, file, fileIndex) {
@@ -668,7 +668,7 @@
 			}
 
 			console.log(progress + '% uploaded - ' + fileIndex)
-			this.$element.trigger('progress.greet.fileupload', file, fileIndex)
+			this.$element.trigger('progress.gt.fileupload', file, fileIndex)
 		}
 	}
 
@@ -678,7 +678,7 @@
 
 		file.$loading.remove()
 		this.$element.find('.fileupload-error').css('display', 'block')
-		this.$element.trigger('abort.greet.fileupload', file, fileIndex)
+		this.$element.trigger('abort.gt.fileupload', file, fileIndex)
 	}
 
 	Fileupload.prototype.fileError = function(event, file, fileIndex) {
@@ -688,7 +688,7 @@
 		file.$loading.remove()
 		this.$element.find('.fileupload-error').css('display', 'block')
 
-		this.$element.trigger('error.greet.fileupload', file, fileIndex)
+		this.$element.trigger('error.gt.fileupload', file, fileIndex)
 	}
 
 	Fileupload.prototype.uploadComplete = function(response, file, fileIndex) {
@@ -722,7 +722,7 @@
 			console.log('onload - ' + fileIndex)
 
 			this.$element.find('.fileupload-success').css('display', 'block')
-			this.$element.trigger('uploaded.greet.fileupload', file, fileIndex)
+			this.$element.trigger('uploaded.gt.fileupload', response, file, fileIndex)
 		}
 	}
 
@@ -789,10 +789,10 @@
 	$.fn.fileupload = function (option) {
 		return this.each(function () {
 			var $this   = $(this)
-			var data    = $this.data('greet.fileupload')
+			var data    = $this.data('gt.fileupload')
 			var options = $.extend({}, Fileupload.DEFAULTS, $this.data(), typeof option == 'object' && option)
 
-			if (!data) $this.data('greet.fileupload', (data = new Fileupload(this, options)))
+			if (!data) $this.data('gt.fileupload', (data = new Fileupload(this, options)))
 			if (typeof option == 'string') data[option]()
 		})
 	}
@@ -814,13 +814,13 @@
 
 	$(document).on('click.fileupload.data-api', '[data-provides="fileupload"]', function (e) {
 		var $this = $(this)
-		if ($this.data('greet.fileupload')) return
+		if ($this.data('gt.fileupload')) return
 		$this.fileupload($this.data())
 
 		var $target = $(e.target).closest('[data-dismiss="fileupload"],[data-trigger="fileupload"]');
 		if ($target.length > 0) {
 			e.preventDefault()
-			$target.trigger('click.greet.fileupload')
+			$target.trigger('click.gt.fileupload')
 		}
 	})
 
