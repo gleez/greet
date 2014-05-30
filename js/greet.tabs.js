@@ -19,7 +19,7 @@
 	// ====================
 
 	var Tabs = function (element, options) {
-		this.element  = $(element)
+		this.$element  = $(element)
 		this.options  = options
 		this.collection
 		this.dropDown
@@ -28,19 +28,34 @@
 	}
 
 	Tabs.DEFAULTS = {
-		  text: '<i class="fa fa-align-justify"></i>'
-		, delay: 100
-		, type: 'json'
-		, cache: false
-		, container: false
-		, tabdelay: false
-		, tabreload: true
-		, tabreshow: true
+		  text      : '<i class="fa fa-align-justify"></i>'
+		, delay     : 100
+		, type      : 'json'
+		, cache     : false
+		, remote    : false
+		, container : false
+		, tabdelay  : false
+		, tabreload : true
+		, tabreshow : true
 	}
 
 	// Load remote data into tab content
+	Tabs.prototype.ajax = function () {
+		var href = this.$element.attr('href')
+
+		if(href && /#/.test(href)){
+			this.options.container = $('#' + href.split('#')[1])
+		}
+
+		if(href && !/#/.test(href)){
+			this.options.remote = href
+		}
+
+		this.tabTimer()
+	}
+
 	Tabs.prototype.remote = function () {
-		if (this.options.remote){
+		if (this.options.remote && this.options.tabreload){
 			var that = this
 		
 			//do the ajax call
@@ -52,7 +67,7 @@
 				beforeSend: function ( xhr ) {}
 			}, 300)
 			.done(function(data, textStatus, jqXHR){
-				//that.show()
+				that.reveal(data, that, jqXHR)
 			})
 			.fail(function (jqXHR, textStatus, errorThrown) {
 				//that.show()
@@ -60,14 +75,39 @@
 		}
 	}
 
+	Tabs.prototype.reveal = function (data, tabs, jqXHR) {
+		var json = false
+
+		// First see if we've retrieved json or something else
+		try {
+			json = $.parseJSON(jqXHR.responseText)
+		} catch (e) {
+			json = false
+			console.log(e)
+		}
+
+		if (json && typeof json.Body !== undefined) {
+			data = $.base64Decode(json.Body)
+		}
+
+		var $data = $($.parseHTML(data))
+
+		if (data && this.options.container) {
+			this.options.container.empty().html($data)
+		}
+
+		// Trigger an event then plugins can attach to when tabs are shown.
+		this.$element.trigger('reveal.gt.tabs')
+	}
+
 	// Move Tabs to dropdown if tabs do not fit in a single row
 	Tabs.prototype.drop = function () {
-		this.dropDown = this.element.find('>li.tabdrop').not('.no-tabdrop')
+		this.dropDown = this.$element.find('>li.tabdrop').not('.no-tabdrop')
 		this.collection = []
 
 		if(this.dropDown.length == 0){
 			this.dropDown = $('<li class="dropdown hide pull-right tabdrop"><a class="dropdown-toggle" data-toggle="dropdown" href="#">'+this.options.text+' <b class="caret"></b></a><ul class="dropdown-menu"></ul></li>')
-							.prependTo(this.element)
+							.prependTo(this.$element)
 		}
 
 		$(window).on('resize.tabs.data-api', $.proxy(this.resizeTimer, this))
@@ -79,7 +119,7 @@
 		this.dropDown.removeClass('hide')
 
 		// Find the extra tabs to push to dropdown
-		this.element.find('>li')
+		this.$element.find('>li')
 			.not('.tabdrop')
 			.each(function(){
 				if(this.offsetTop > 0) {
@@ -123,7 +163,7 @@
 
 	// Try to navigate to the tab/accordion last given in the URL
 	Tabs.prototype.reShow = function () {
-		var hash 	   = document.location.hash
+		var hash       = document.location.hash
 		, hasTab       = false
 		, hasAccordion = false
 
@@ -154,7 +194,7 @@
 			var $this   = $(this)
 			var data    = $this.data('tabs')
 			var options = $.extend({}, Tabs.DEFAULTS, $this.data(), typeof option == 'object' && option)
-			
+
 			if (!data) $this.data('tabs', (data = new Tabs(this, options)))
 			if (typeof option == 'string') data[option]()
 		})
@@ -174,9 +214,9 @@
 	// ==============
 
 	// Load remote data into tab content
-	$(document).on('click.tabs.data-api', '[data-toggle="tabdrop"]', function (e) {
-		//e.preventDefault()
-		//$(this).tabs()
+	$(document).on('click.tabs.data-api', '[data-provider="tabs"]', function (e) {
+		e.preventDefault()
+		$(this).tabs('ajax')
 	})
 
 	// Move Tabs to dropdown if tabs do not fit in a single row

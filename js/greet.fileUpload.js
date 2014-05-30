@@ -84,17 +84,20 @@
 	Fileupload.prototype.accept = function(file) {
 		//restrict number of uploaded files when queue is 0
 		if(this.options.maxfiles > 0 && this.total >= this.options.maxfiles && this.options.queuefiles === 0){
+			this.$element.trigger('error.gt.fileupload', [file, 'maxfiles'])
 			return false
 		}
 
 		// Check file against file size restrictions
 		if (this.options.size > 0 && (typeof file.size !== 'undefined') && file.size > this.options.size) {
+			this.$element.trigger('error.gt.fileupload', [file, 'size'])
 			return false
 		}
 
 		// Check file against file type restrictions
 		if (this.options.filetypes.push && this.options.filetypes.length) {
 			if(!file.type || $.inArray(file.type, this.options.filetypes) < 0) {
+				this.$element.trigger('error.gt.fileupload', [file, 'filetypes'])
 				return false
 			}
 		}
@@ -121,8 +124,7 @@
 
 		if(this.accept(file)) {
 			this.workQueue.push(i)
-
-			this.$element.trigger('add.gt.fileupload', file, i)
+			this.$element.trigger('add.gt.fileupload', [file, i])
 		}
 	}
 
@@ -199,7 +201,7 @@
 			var xhr  = file.xhr = new XMLHttpRequest()
 			,   that = this
 
-			this.$element.trigger('upload.gt.fileupload', file, fileIndex)
+			this.$element.trigger('upload.gt.fileupload', [file, fileIndex])
 
 			if(this.isHTML5){
 				// Add event handlers
@@ -411,7 +413,6 @@
 		if(file.chunked){
 			xhr.overrideMimeType('application/octet-stream')
 			xhr.setRequestHeader('Content-Range', 'bytes '+file.start+"-"+file.end+"/"+file.size)
-			//xhr.setRequestHeader('Sender', 'XMLHttpRequest')
 
 			// custom header with filename and full size
 			xhr.setRequestHeader("X-File-Name",   file.name)
@@ -469,7 +470,7 @@
 				preview.html($img)
 				element.addClass('fileupload-exists').removeClass('fileupload-new')
 
-				element.trigger('change.gt.fileupload', this.files)
+				element.trigger('change.gt.fileupload', [this.files, file, this.$element])
 			}
 
 			reader.readAsDataURL(file)
@@ -667,28 +668,25 @@
 				bytesSent : loaded
 			}
 
-			console.log(progress + '% uploaded - ' + fileIndex)
-			this.$element.trigger('progress.gt.fileupload', file, fileIndex)
+			this.$element.trigger('progress.gt.fileupload', [file, fileIndex])
 		}
 	}
 
 	Fileupload.prototype.fileAbort = function(event, file, fileIndex) {
 		file.status = Fileupload.CANCELED
-		console.log('onabort - ' + fileIndex)
 
 		file.$loading.remove()
 		this.$element.find('.fileupload-error').css('display', 'block')
-		this.$element.trigger('abort.gt.fileupload', file, fileIndex)
+		this.$element.trigger('abort.gt.fileupload', [file, fileIndex])
 	}
 
 	Fileupload.prototype.fileError = function(event, file, fileIndex) {
 		file.status = Fileupload.ERROR
-		console.log('onerror - ' + fileIndex)
 
 		file.$loading.remove()
 		this.$element.find('.fileupload-error').css('display', 'block')
 
-		this.$element.trigger('error.gt.fileupload', file, fileIndex)
+		this.$element.trigger('error.gt.fileupload', [file, fileIndex])
 	}
 
 	Fileupload.prototype.uploadComplete = function(response, file, fileIndex) {
@@ -719,10 +717,8 @@
 			this.doneQueue.push(fileIndex)
 			file.$loading.remove()
 
-			console.log('onload - ' + fileIndex)
-
 			this.$element.find('.fileupload-success').css('display', 'block')
-			this.$element.trigger('uploaded.gt.fileupload', response, file, fileIndex)
+			this.$element.trigger('uploaded.gt.fileupload', [response, file, fileIndex])
 		}
 	}
 
@@ -761,7 +757,7 @@
 		inputname    : 'files',
 		multiple     : '',
 		size         : 0, // Max individual file size
-		filetypes    : [], // Allowed file extentions ex: 'image/png', 'image/jpeg'
+		filetypes    : {}, // Allowed file extentions ex: 'image/png', 'image/jpeg'
 		data         : {},
 		headers      : {},
 		maxfiles     : 15, // Ignored if queuefiles is set > 0
@@ -798,7 +794,6 @@
 	}
 
 	$.fn.fileupload.Constructor = Fileupload
-
 
 	// FILEUPLOAD NO CONFLICT
 	// ====================

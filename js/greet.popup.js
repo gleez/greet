@@ -50,7 +50,7 @@
 				type: "GET",
 				dataType: this.options.type,
 				cache: this.options.cache,
-			beforeSend: function ( xhr ) {}
+				beforeSend: function ( xhr ) {}
 			}, 300)
 			.done(function(data, textStatus, jqXHR){
 				that.show()
@@ -656,7 +656,7 @@
 	$(document).on('click.popup.data-api', '[data-toggle="popup"]', function (e) {
 		var $this   = $(this)
 		var href    = $this.attr('href')
-		var $target = $($.fn.popup.defaults.template.replace('{popup.id}', 'popup-'+ new Date().getTime()))
+		var $target = $(Popup.DEFAULTS.template.replace('{popup.id}', 'popup-'+ new Date().getTime()))
 		var option  = $.extend({ remote:!/#/.test(href) && href }, $target.data(), $this.data())
 
 		e.preventDefault()
