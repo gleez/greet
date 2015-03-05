@@ -1287,5 +1287,13 @@
 			$table.tabledrag($table.data())
 		})
 	})
+	
+	// Added pajax and jquery mobile support
+	$(document).on('pjax:complete pagecontainerchange', function (e) {
+		$('[data-toggle="tabledrag"]').each(function () {
+			var $table = $(this)
+			$table.tabledrag($table.data())
+		})
+	})
 
 }(jQuery);
