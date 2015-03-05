@@ -299,6 +299,7 @@
 		})
 	})
 
+	// Added pajax and jquery mobile support
 	$(document).on('pjax:complete pagecontainerchange', function (e) {
 		if (!$.fn.dataTable) return
 		
