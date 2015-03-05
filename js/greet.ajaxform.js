@@ -13,7 +13,8 @@
  *
  */
 
-+function ($) { 'use strict';
++function ($) {
+	'use strict';
 
 	// GREET AJAXFROM CLASS DEFINITION
 	// ======================

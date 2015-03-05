@@ -11,7 +11,8 @@
  *
  */
 
-+function ($) { 'use strict';
++function ($) {
+	'use strict';
 
 	// GREET DATATABLE CLASS DEFINITION
 	// ======================

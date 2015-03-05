@@ -11,7 +11,8 @@
  *
  */
 
-+function ($) { 'use strict';
++function ($) {
+	'use strict';
 
 	/* GREET TYPEAHEAD PUBLIC CLASS DEFINITION
 	 * ================================= */

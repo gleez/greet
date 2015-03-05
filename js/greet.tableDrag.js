@@ -16,7 +16,8 @@
  *
  */
 
-+function ($) { 'use strict';
++function ($) {
+	'use strict';
 	/**
 	 * Constructor for the tableDrag object. Provides table and field manipulation.
 	 *

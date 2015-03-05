@@ -11,7 +11,8 @@
  *
  */
 
-+function ($) { 'use strict';
++function ($) {
+	'use strict';
 
 	// GREET FILEUPLOAD PUBLIC CLASS DEFINITION
 	// ======================
