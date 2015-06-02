@@ -1,0 +1,26 @@
+{
+  "name": "gleez-greet",
+  "version": "1.0.0",
+  "description": "Greet is a JavaScript library & snippets for building user interfaces developed at Gleez",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gleez/greet.git"
+  },
+  "keywords": [
+    "Jquery",
+    "Bootstrap",
+    "popup",
+    "modal",
+    "css",
+    "plugins"
+  ],
+  "author": "Sandeep Sangamreddi <sandeepone@gmail.com> (http://gleeztech.com/)",
+  "license": "MIT License",
+  "bugs": {
+    "url": "https://github.com/gleez/greet/issues"
+  }
+}
