@@ -76,7 +76,7 @@
 			cache: this.options.cache,
 			beforeSend: function ( xhr ) {}
 		}, 300)
-		.done(function(data, textStatus, jqXHR){
+		.done(function(data, textStatus, jqXHR){ 
 			that.successHandler(data, that, jqXHR)
 		})
 		.fail(function (jqXHR, textStatus, errorThrown) {
@@ -90,16 +90,18 @@
 	}
 
 	Chart.prototype.successHandler = function (json, that, jqXHR){
-		if( this.options.chart == 'donut'){
-			this.chart.setData(json.data)
-		}
-		if( this.options.chart == 'line'){
-			//this.chart.setData(json.data)
-			this.line(json)
-		}
-		if( this.options.chart == 'bar'){
-			//this.chart.setData(json.data)
-			this.bar(json)
+		if (json.data.length != 0) {
+			if( this.options.chart == 'donut'){
+				this.chart.setData(json.data)
+			}
+			if( this.options.chart == 'line'){
+				//this.chart.setData(json.data)
+				this.line(json)
+			}
+			if( this.options.chart == 'bar'){
+				//this.chart.setData(json.data)
+				this.bar(json)
+			}
 		}
 	}
 
@@ -111,7 +113,7 @@
 			resize: true
 		})
 		.on('click', function(i, row){
-			console.log(i, row)
+			//console.log(i, row)
 		})
 	}
 
@@ -130,7 +132,7 @@
 			resize: true
 		})
 		.on('click', function(i, row){
-			console.log(i, row)
+			//console.log(i, row)
 		})
 	}
 	
@@ -147,7 +149,7 @@
 			resize: true
 		})
 		.on('click', function(i, row){
-			console.log(i, row)
+			//console.log(i, row)
 		})
 	}
 	

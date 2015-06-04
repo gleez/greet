@@ -236,6 +236,7 @@
 					thisFilter.append('<i class="fa fa-search"></i>')
 					thisFilterInput.attr('placeholder', 'Search '+title+'...')
 					thisFilter.parents("div.panel-body.hide").removeClass('hide')
+					thisFilter.parents("div#content.panel-body").addClass('no-padding')
 				}
 			}
 		}
