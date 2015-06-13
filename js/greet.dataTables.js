@@ -4,7 +4,7 @@
  * https://github.com/gleez/greet
  * 
  * @package    Greet\DataTables
- * @version    4.0
+ * @version    4.1
  * @requires   jQuery v1.9 or later
  * @author     Sandeep Sangamreddi - Gleez
  * @copyright  (c) 2005-2015 Gleez Technologies
@@ -215,26 +215,33 @@
 				, thisFilterInput  = $('#' + currentId + '_filter label input')
 				, title            = $(this).data('title') || false
 				, pretty           = $(this).data('template') || false
+				, search           = $('div.dataTables_filter input[type=search]') || false
 
 				// Re-arrange the records selection for a form-horizontal layout
 				thisLengthLabel.addClass('control-label').attr('for', currentId + '_length_select')
 				thisLengthSelect.addClass('form-control input-sm').attr('id', currentId + '_length_select')
 
-				// Re-arrange the search input for a form-horizontal layout
-				thisFilter.addClass('form-group')
-				thisFilterInput.appendTo(thisFilter)
-				thisFilterLabel.remove()
-				thisFilterInput.attr('placeholder', 'Search...')
-				thisFilter.parent().removeClass('hide')
-				$(this).find('thread.hide').removeClass('hide')
+				if(search.length == 1) {
+					// Re-arrange the search input for a form-horizontal layout
+					thisFilter.addClass('form-group')
+					thisFilterInput.appendTo(thisFilter)
+					thisFilterLabel.remove()
+					thisFilterInput.attr('placeholder', 'Search...')
+					thisFilter.parent().removeClass('hide')
+					$(this).find('thread.hide').removeClass('hide')
+				}
 
 				// Pretty Support
 				if(title && pretty) {
-					var add = $(document).find('script.card-add').html() || false
-					thisFilter.parents("div.search-form").find("div.col-xs-3").append(add)
 
-					thisFilter.append('<i class="fa fa-search"></i>')
-					thisFilterInput.attr('placeholder', 'Search '+title+'...')
+					if(search.length == 1){
+						var add = $(document).find('script.card-add').html() || false
+						thisFilter.parents("div.search-form").find("div.col-xs-3").append(add)
+
+						thisFilter.append('<i class="fa fa-search"></i>')
+						thisFilterInput.attr('placeholder', 'Search '+title+'...')
+					}
+
 					thisFilter.parents("div.panel-body.hide").removeClass('hide')
 					thisFilter.parents("div#content.panel-body").addClass('no-padding')
 				}
