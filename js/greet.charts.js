@@ -59,7 +59,6 @@
 		$.ajax({
 			url: this.options.url,
 			type: "GET",
-			async: false,
 			dataType: 'json',
 			cache: this.options.cache,
 			beforeSend: function ( xhr ) {}
