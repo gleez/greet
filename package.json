@@ -1,6 +1,6 @@
 {
   "name": "gleez-greet",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Greet is a JavaScript library & snippets for building user interfaces developed at Gleez",
   "main": "index.js",
   "scripts": {

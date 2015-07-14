@@ -53,8 +53,7 @@
 		this.loading = true;
 		this.$element.append('<div class="Loading">&#160;</div>')
 		var that = this
-		
-		
+
 		//do the ajax call
 		$.ajax({
 			url: this.options.url,
@@ -76,17 +75,17 @@
 		});
 	}
 
-	Chart.prototype.successHandler = function (json, that, jqXHR){
-		if (json.data.length != 0) {
+	Chart.prototype.successHandler = function (res, that, jqXHR){
+		if (res.data && res.data.length != 0) {
 			try {
 				if( this.options.chart == 'donut'){
-					this.donut(json)
+					this.donut(res)
 				}
 				if( this.options.chart == 'line'){
-					this.line(json)
+					this.line(res)
 				}
 				if( this.options.chart == 'bar'){
-					this.bar(json)
+					this.bar(res)
 				}
 			} catch(e) {
 				console.log(e)
@@ -94,10 +93,10 @@
 		}
 	}
 
-	Chart.prototype.donut = function(json){
+	Chart.prototype.donut = function(res){
 		this.chart = Morris.Donut({
 			element: $(this.$element),
-			data: json.data,
+			data: res.data,
 			resize: true
 		})
 		.on('click', function(i, row){
@@ -105,18 +104,17 @@
 		})
 	}
 
-	Chart.prototype.line = function(json){
-		
+	Chart.prototype.line = function(res){
 		this.chart = Morris.Line({
 			element: $(this.$element),
 			// Set initial data (ideally you would provide an array of default data)
-			data: json.data,
-			xkey: json.xkey,
-			ykeys: json.ykeys,
-			labels: json.labels,
+			data: res.data,
+			xkey: res.xkey,
+			ykeys: res.ykeys,
+			labels: res.labels,
 			hideHover: 'auto',
-			lineColors: (json.lineColors) ? json.lineColors : ['#428bca', 'grey'],
-			preUnits: (json.preUnits) ? json.preUnits : '',
+			lineColors: (res.lineColors) ? res.lineColors : ['#428bca', 'grey'],
+			preUnits: (res.preUnits) ? res.preUnits : '',
 			resize: true
 		})
 		.on('click', function(i, row){
@@ -124,14 +122,14 @@
 		})
 	}
 	
-	Chart.prototype.bar = function(json){
+	Chart.prototype.bar = function(res){
 		this.chart = Morris.Bar({
 			element: $(this.$element),
 			// Set initial data (ideally you would provide an array of default data)
-			data: json.data,
-			xkey: json.xkey,
-			ykeys: json.ykeys,
-			labels: json.labels,
+			data: res.data,
+			xkey: res.xkey,
+			ykeys: res.ykeys,
+			labels: res.labels,
 			horizontal: true,
 			hideHover: 'auto',
 			resize: true
