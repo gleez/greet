@@ -4,7 +4,7 @@
  * https://github.com/gleez/greet
  * 
  * @package    Greet\Charts
- * @version    1.0
+ * @version    1.1
  * @requires   jQuery v1.9 or later
  * @author     Sandeep Sangamreddi - Gleez
  * @copyright  (c) 2005-2015 Gleez Technologies
@@ -38,18 +38,6 @@
 	Chart.prototype.start = function () {
 		this.fire    = true
 
-		if( this.options.chart == 'donut'){
-			this.donut()
-		}
-		
-		if( this.options.chart == 'line'){
-			//this.line()
-		}
-		
-		if( this.options.chart == 'bar'){
-			//this.bar()
-		}
-		
 		this.getJson()
 	}
 
@@ -91,25 +79,26 @@
 
 	Chart.prototype.successHandler = function (json, that, jqXHR){
 		if (json.data.length != 0) {
-			if( this.options.chart == 'donut'){
-				this.chart.setData(json.data)
-			}
-			if( this.options.chart == 'line'){
-				//this.chart.setData(json.data)
-				this.line(json)
-			}
-			if( this.options.chart == 'bar'){
-				//this.chart.setData(json.data)
-				this.bar(json)
+			try {
+				if( this.options.chart == 'donut'){
+					this.donut(json)
+				}
+				if( this.options.chart == 'line'){
+					this.line(json)
+				}
+				if( this.options.chart == 'bar'){
+					this.bar(json)
+				}
+			} catch(e) {
+				console.log(e)
 			}
 		}
 	}
 
-	Chart.prototype.donut = function(){
+	Chart.prototype.donut = function(json){
 		this.chart = Morris.Donut({
 			element: $(this.$element),
-			// Set initial data (ideally you would provide an array of default data)
-			data: [0, 0],
+			data: json.data,
 			resize: true
 		})
 		.on('click', function(i, row){
