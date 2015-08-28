@@ -483,8 +483,8 @@ a.list-group-item:hover, a.list-group-item:active, a.list-group-item.active, a.l
 
 /* Disclosure Indicators */
 a.list-group-item:before {
-    font-family: 'FontAwesome';
-    content: '';
+  font-family: "FontAwesome";
+  content: "\f054";
     position: absolute;
     right: 15px;
     top: 50%;
